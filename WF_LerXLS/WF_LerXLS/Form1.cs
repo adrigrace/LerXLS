@@ -112,7 +112,7 @@ namespace WF_LerXLS
                                         }
                                         catch
                                         {
-                                            //rnew[cCnt - 1] = "";
+                                            
                                         }
                                     }
 
