@@ -1,0 +1,10 @@
+C:\Aplicacoes\LerXLS\WF_LerXLS\WF_LerXLS\bin\Debug\WF_LerXLS.exe.config
+C:\Aplicacoes\LerXLS\WF_LerXLS\WF_LerXLS\bin\Debug\WF_LerXLS.exe
+C:\Aplicacoes\LerXLS\WF_LerXLS\WF_LerXLS\bin\Debug\WF_LerXLS.pdb
+C:\Aplicacoes\LerXLS\WF_LerXLS\WF_LerXLS\obj\Debug\WF_LerXLS.csprojResolveAssemblyReference.cache
+C:\Aplicacoes\LerXLS\WF_LerXLS\WF_LerXLS\obj\Debug\WF_LerXLS.Form1.resources
+C:\Aplicacoes\LerXLS\WF_LerXLS\WF_LerXLS\obj\Debug\WF_LerXLS.Properties.Resources.resources
+C:\Aplicacoes\LerXLS\WF_LerXLS\WF_LerXLS\obj\Debug\WF_LerXLS.csproj.GenerateResource.Cache
+C:\Aplicacoes\LerXLS\WF_LerXLS\WF_LerXLS\obj\Debug\WF_LerXLS.exe
+C:\Aplicacoes\LerXLS\WF_LerXLS\WF_LerXLS\obj\Debug\WF_LerXLS.pdb
+C:\Aplicacoes\LerXLS\WF_LerXLS\WF_LerXLS\obj\Debug\WF_LerXLS.csproj.ResolveComReference.cache
