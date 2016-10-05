@@ -23,6 +23,7 @@ namespace WF_LerXLS
             InitializeComponent();
         }
 
+
         private void btn_Arquivo_Original_Click(object sender, EventArgs e)
         {
             Stream myStream = null;
