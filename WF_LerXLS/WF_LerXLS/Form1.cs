@@ -11,7 +11,8 @@ using System.IO;
 using System.Data.OleDb;
 
 using Excel = Microsoft.Office.Interop.Excel;
-using System.Collections; 
+using System.Collections;
+using System.Reflection; 
 
 namespace WF_LerXLS
 {
@@ -22,11 +23,13 @@ namespace WF_LerXLS
             InitializeComponent();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void btn_Arquivo_Original_Click(object sender, EventArgs e)
         {
             Stream myStream = null;
             string leitura = "Falha na leitura";
-                     
+
+            lstbox_campos.Items.Clear();
+
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
 
             openFileDialog1.InitialDirectory = "c:\\";
@@ -34,15 +37,16 @@ namespace WF_LerXLS
             openFileDialog1.FilterIndex = 2;
             openFileDialog1.RestoreDirectory = true;
 
-     
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
+                lblarquivo_origem.Text = openFileDialog1.FileName.ToString();
+
                 try
                 {
                     if ((myStream = openFileDialog1.OpenFile()) != null)
                     {
-                        leitura = LerExcel(openFileDialog1.FileName, Path.GetExtension(openFileDialog1.FileName), 
-                            openFileDialog1.FileName.Replace(Path.GetExtension(openFileDialog1.FileName),""));
+                        leitura = TrazerItens(openFileDialog1.FileName, Path.GetExtension(openFileDialog1.FileName),
+                            openFileDialog1.FileName.Replace(Path.GetExtension(openFileDialog1.FileName), ""));
 
                         if (leitura != "")
                         {
@@ -55,241 +59,80 @@ namespace WF_LerXLS
                     MessageBox.Show("Error: Could not read file from disk. Original error: " + ex.Message);
                 }
             }
-            if (leitura == "")
-            {
-                MessageBox.Show("Leitura concluída com sucesso");
-            }
         }
 
-        public string LerExcel(string NomeArquivo, string extensao, string nomesemextensao)
+        public string TrazerItens(string NomeArquivo, string extensao, string nomesemextensao)
         {
-            try 
+            try
             {
-			    Excel.Application xlApp;
-			    Excel.Workbook xlWorkBook;
-			    Excel.Worksheet xlWorkSheet;
-			    Excel.Range range;
+                
+                Excel.Application xlApp;
+                Excel.Workbook xlWorkBook;
+                Excel.Worksheet xlWorkSheet;
+                Excel.Range range;
 
-			    DataTable dtSemDup;
-			    DataTable dtDuplic;
+                int rCnt = 0;
+                int cCnt = 0;
 
-			    int rCnt = 0;
-			    int cCnt = 0;
+                xlApp = new Excel.Application();
+                xlWorkBook = xlApp.Workbooks.Open(NomeArquivo, 0, true, 5, "", "", true, Microsoft.Office.Interop.Excel.XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
+                xlWorkSheet = (Excel.Worksheet)xlWorkBook.Worksheets.get_Item(1);
 
-			    xlApp = new Excel.Application();
-			    xlWorkBook = xlApp.Workbooks.Open(NomeArquivo, 0, true, 5, "", "", true, Microsoft.Office.Interop.Excel.XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
-			    xlWorkSheet = (Excel.Worksheet)xlWorkBook.Worksheets.get_Item(1);
+                range = xlWorkSheet.UsedRange;
 
-			    range = xlWorkSheet.UsedRange;
+                //lstbox_campos.Items.Add("Nenhuma");
 
-			    DataSet ds = new DataSet();
-			    foreach (Excel.Worksheet sheet in xlWorkBook.Sheets)
-			    {
-				    DataTable dt = new DataTable(sheet.Name);
+                DataSet ds = new DataSet();
+                foreach (Excel.Worksheet sheet in xlWorkBook.Sheets)
+                {
+                    DataTable dt = new DataTable(sheet.Name);
+                   
+                    for (rCnt = 1; rCnt <= range.Rows.Count; rCnt++)
+                    {
+                        for (cCnt = 1; cCnt <= range.Columns.Count; cCnt++)
+                        {
+                            try
+                            {
+                                lstbox_campos.Items.Add((string)(range.Cells[rCnt, cCnt] as Excel.Range).Value2);
+                            }
+                            catch
+                            {
+                                lstbox_campos.Items.Add("Não Identificado");
+                            }
+                        }
+                        break;
+                    }
 
-				    for (rCnt = 1; rCnt <= range.Rows.Count; rCnt++)
-				    {
-					    for (cCnt = 1; cCnt <= range.Columns.Count; cCnt++)
-					    {
-						    DataColumn myDataColumn;
-
-						    myDataColumn = new DataColumn();
-						    try
-						    {
-							    Type typex = xlWorkSheet.Cells[2, cCnt].Value.GetType();
-							    myDataColumn.ColumnName = (string)(range.Cells[rCnt, cCnt] as Excel.Range).Value2;
-							    myDataColumn.DataType = Type.GetType(typex.ToString());
-						    }
-						    catch
-						    {
-							    myDataColumn.ColumnName = (string)(range.Cells[rCnt, cCnt] as Excel.Range).Value2;
-							    myDataColumn.DataType = Type.GetType("System.String");
-						    }
-
-						    dt.Columns.Add(myDataColumn);
-					    }
-					    break;
-				    }
-
-				    for (rCnt = 2; rCnt <= range.Rows.Count; rCnt++)
-				    {
-					    DataRow rnew = dt.NewRow();
-					    for (cCnt = 1; cCnt <= range.Columns.Count; cCnt++)
-					    {
-
-						    Type typex = null;
-						    try
-						    {
-							    typex = xlWorkSheet.Cells[rCnt, cCnt].Value.GetType();
-						    }
-						    catch
-						    {
-							    typex = Type.GetType("System.String");
-						    }
-
-
-						    if (typex.FullName.ToString() == "System.String")
-						    {
-							    try
-							    {
-								    rnew[cCnt - 1] = (string)(range.Cells[rCnt, cCnt] as Excel.Range).Value2;
-							    }
-							    catch
-							    {
-
-							    }
-						    }
-
-						    if (typex.FullName.ToString() == "System.Double")
-						    {
-							    try
-							    {
-								    rnew[cCnt - 1] = (double)(range.Cells[rCnt, cCnt] as Excel.Range).Value2;
-							    }
-							    catch
-							    {
-
-							    }
-						    }
-
-						    if (typex.FullName.ToString() == "System.DateTime")
-						    {
-							    try
-							    {
-								    rnew[cCnt - 1] = DateTime.FromOADate((range.Cells[rCnt, cCnt] as Excel.Range).Value2);
-							    }
-							    catch
-							    {
-
-							    }
-						    }
-					    }
-					    dt.Rows.Add(rnew);
-				    }
-				    ds.Tables.Add(dt);
-
-				    DataTable dt1;
-				    dt1 = dt.Clone();
-				    dt1 = dt.Copy();
-
-				    dtSemDup = RemoveDuplicateRows(dt, 1);
-				    dtDuplic = RemoveRows(dt1, 1);
-
-                    CriarExcel(nomesemextensao+"_resultado"+extensao, dtSemDup);
-                    CriarExcel(nomesemextensao + "_duplicado" + extensao, dtDuplic);
                     break;
-			    }
+                }
 
-			    xlWorkBook.Close(true, null, null);
-			    xlApp.Quit();
+                xlWorkBook.Close(true, null, null);
+                xlApp.Quit();
 
-			    releaseObject(xlWorkSheet);
-			    releaseObject(xlWorkBook);
-			    releaseObject(xlApp);
-			    return "";
-			}
+                releaseObject(xlWorkSheet);
+                releaseObject(xlWorkBook);
+                releaseObject(xlApp);
+                return "";
+            }
             catch
             {
                 return "houve uma falha";
             }
         }
 
-        public string CriarExcel(string NomeArquivo, DataTable DtConteudo)
+        private void btn_Arquivo_Comparativo_Click(object sender, EventArgs e)
         {
-            try
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+
+            openFileDialog1.InitialDirectory = "c:\\";
+            openFileDialog1.Filter = "xls files (*.xls)|*.xls|All files (*.*)|*.*";
+            openFileDialog1.FilterIndex = 2;
+            openFileDialog1.RestoreDirectory = true;
+
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                Excel.Application xlApp;
-			    Excel.Workbook xlWorkBook;
-			    Excel.Worksheet xlWorkSheet;
-
-                xlApp = new Excel.Application();
- 
-                object misValue = System.Reflection.Missing.Value;
- 
-                xlWorkBook = xlApp.Workbooks.Add(System.Reflection.Missing.Value); 
-                xlWorkSheet = (Excel.Worksheet)xlWorkBook.Sheets["Plan1"]; 
- 
-                int iLinha = 0;
-                foreach (DataRow Dr in DtConteudo.Rows)
-                {
-                    iLinha = iLinha + 1;
-                    int iColuna = 0;
-                    foreach (DataColumn Dc in DtConteudo.Columns)
-                    {
-                        iColuna = iColuna + 1;
-                        xlWorkSheet.Cells[iLinha, iColuna] = Dr[Dc.ColumnName];
-                    }
-                }
-
-                xlWorkBook.SaveAs(NomeArquivo, Excel.XlFileFormat.xlWorkbookNormal,  misValue, misValue, false, misValue,  Excel.XlSaveAsAccessMode.xlNoChange, misValue, misValue, misValue,  misValue, misValue);
-                xlWorkBook.Close(true, misValue, misValue);
- 
-                xlApp.Quit();
-
-                releaseObject(xlWorkSheet);
-                releaseObject(xlWorkBook);
-                releaseObject(xlApp);
-             }
-             catch (Exception e)
-             {
-                return "Houve um erro na criação do arquivo. Consulte o administrador do sistema. n" + e.Message;
-             }
- 
-            return "";
-        }
- 
-        public DataTable RemoveDuplicateRows(DataTable dTable, int indice)
-        {
-            Hashtable hTable = new Hashtable();
-            ArrayList duplicateList = new ArrayList();
-
-            foreach (DataRow drow in dTable.Rows)
-            {
-                if (hTable.Contains(drow[indice]))
-                {
-                    duplicateList.Add(drow);
-                }
-                else
-                    hTable.Add(drow[indice], string.Empty);
+                lblarquivo_comparativo.Text = openFileDialog1.FileName.ToString();
             }
-            
-            foreach (DataRow dRow in duplicateList)
-            {
-                dTable.Rows.Remove(dRow);
-            }
-            return dTable;
-        }
-
-        public DataTable RemoveRows(DataTable dTable, int indice)
-        {
-            Hashtable hTable = new Hashtable();
-            ArrayList duplicateList = new ArrayList();
-
-            foreach (DataRow drow in dTable.Rows)
-            {
-                if (hTable.Contains(drow[indice]))
-                {
-                    duplicateList.Add(drow);
-                }
-                else
-                    hTable.Add(drow[indice], string.Empty);
-            }
-
-            DataTable dtAux;
-            dtAux = dTable.Clone();
-
-            //foreach (DataRow dRow in dTable.Rows)
-            //{
-            //    dTable.Rows.Remove(dRow);
-            //}
-            //dTable.AcceptChanges();
-
-            foreach (DataRow dRow in duplicateList)
-            {
-                dtAux.Rows.Add(dRow.ItemArray);
-            }
-            //dTable.AcceptChanges();
-            return dtAux;
         }
 
         private void releaseObject(object obj)
@@ -308,6 +151,554 @@ namespace WF_LerXLS
             {
                 GC.Collect();
             }
-        } 
+        }
+
+        private void btn_comparar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int cDuplic;
+                int iItemchave = -1;
+     
+                int clin = 0;
+                int ccol = 0;
+
+                try
+                {
+                    iItemchave = lstbox_campos.SelectedIndex;
+                }
+                catch
+                {
+                    iItemchave = -1;
+                }
+
+                DataTable dtOrigem = LerExcel(lblarquivo_origem.Text);
+                DataTable dtComparativo = LerExcel(lblarquivo_comparativo.Text);
+                DataTable dtResultado = new DataTable();
+
+                dtResultado = dtOrigem.Clone();
+
+                DataColumn dc;
+                dc = new DataColumn();
+                dc.ColumnName = "Erro";
+                dc.DataType = Type.GetType("System.String");
+                dtResultado.Columns.Add(dc);
+
+                progressBar1.Visible = true;
+                btn_comparar.Visible = false;
+
+                for (clin = 0; clin < dtOrigem.Rows.Count; clin++)
+                {
+                    cDuplic = 0;
+
+                    for (ccol = 0; ccol < dtComparativo.Rows.Count; ccol++)
+                    {
+
+                        //pode validar duplicidade
+                        if (iItemchave >= 0)
+                        {
+
+                            //significa q encontrou um registro igual na outra tabela
+                            if (dtOrigem.Rows[clin].ItemArray[iItemchave].ToString() == dtComparativo.Rows[ccol].ItemArray[iItemchave].ToString())
+                            {
+                                cDuplic = cDuplic + 1;
+                                if(cDuplic > 1)
+                                {
+                                    DataRow rnova = dtResultado.NewRow();
+                                    for (ccol = 0; ccol < dtOrigem.Rows[clin].ItemArray.Count(); ccol++)
+                                    {
+                                        rnova[ccol] = dtOrigem.Rows[clin].ItemArray[ccol];
+                                    }
+                                    rnova["Erro"] = "Duplicidade";
+                                    dtResultado.Rows.Add(rnova);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                dtgv1.DataSource = dtResultado;
+            }
+            catch 
+            {
+                progressBar1.Visible = false;
+                btn_comparar.Visible = true;
+            }
+        }
+
+        public DataTable LerExcel(string NomeArquivo)
+        {
+            DataTable dt = new DataTable();
+
+            try
+            {
+                Excel.Application xlApp;
+                Excel.Workbook xlWorkBook;
+                Excel.Worksheet xlWorkSheet;
+                Excel.Range range;
+
+                int rCnt = 0;
+                int cCnt = 0;
+
+                xlApp = new Excel.Application();
+                xlWorkBook = xlApp.Workbooks.Open(NomeArquivo, 0, true, 5, "", "", true, Microsoft.Office.Interop.Excel.XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
+                xlWorkSheet = (Excel.Worksheet)xlWorkBook.Worksheets.get_Item(1);
+
+                range = xlWorkSheet.UsedRange;
+
+                DataSet ds = new DataSet();
+                foreach (Excel.Worksheet sheet in xlWorkBook.Sheets)
+                {
+                    dt = new DataTable(sheet.Name);
+                    DataTable dtErro = new DataTable(sheet.Name);
+
+                    progressBar1.Maximum = range.Rows.Count;
+                    progressBar1.Step = 1;
+                    progressBar1.Value = 0;
+                    progressBar1.Visible = true;
+                    btn_comparar.Visible = false;
+
+                    for (rCnt = 1; rCnt <= range.Rows.Count; rCnt++)
+                    {
+                        progressBar1.PerformStep();
+
+                        for (cCnt = 1; cCnt <= range.Columns.Count; cCnt++)
+                        {
+
+                            DataColumn myDataColumn;
+
+                            myDataColumn = new DataColumn();
+                            try
+                            {
+                                Type typex = xlWorkSheet.Cells[2, cCnt].Value.GetType();
+                                myDataColumn.ColumnName = (string)(range.Cells[rCnt, cCnt] as Excel.Range).Value2;
+                                myDataColumn.DataType = Type.GetType(typex.ToString());
+                            }
+                            catch
+                            {
+                                myDataColumn.ColumnName = (string)(range.Cells[rCnt, cCnt] as Excel.Range).Value2;
+                                myDataColumn.DataType = Type.GetType("System.String");
+                            }
+
+                            dt.Columns.Add(myDataColumn);
+                        }
+                        break;
+                    }
+
+                    //dtErro = dt.Clone();
+
+                    //DataColumn dc;
+                    //dc = new DataColumn();
+                    //dc.ColumnName = "Erro";
+                    //dc.DataType = Type.GetType("System.String");
+                    //dtErro.Columns.Add(dc);
+
+                    //Boolean blinha;
+                    //sfalha = "";
+
+                    //blinha = true;
+
+                    for (rCnt = 2; rCnt <= range.Rows.Count; rCnt++)
+                    {
+                        progressBar1.PerformStep();
+
+                        DataRow rnew = dt.NewRow();
+                        for (cCnt = 1; cCnt <= range.Columns.Count; cCnt++)
+                        {
+
+                            Type typex = null;
+                            try
+                            {
+                                typex = xlWorkSheet.Cells[rCnt, cCnt].Value.GetType();
+                            }
+                            catch
+                            {
+                                typex = Type.GetType("System.String");
+                            }
+
+
+                            if (typex.FullName.ToString() == "System.String")
+                            {
+                                try
+                                {
+                                    rnew[cCnt - 1] = (string)(range.Cells[rCnt, cCnt] as Excel.Range).Value2;
+                                }
+                                catch 
+                                {
+                                    //blinha = false;
+                                    //sfalha = ex1.Message.ToString();
+                                }
+                            }
+
+                            if (typex.FullName.ToString() == "System.Double")
+                            {
+                                try
+                                {
+                                    rnew[cCnt - 1] = (double)(range.Cells[rCnt, cCnt] as Excel.Range).Value2;
+                                }
+                                catch 
+                                {
+                                    //blinha = false;
+                                    //sfalha = ex1.Message.ToString();
+                                }
+                            }
+
+                            if (typex.FullName.ToString() == "System.DateTime")
+                            {
+                                try
+                                {
+                                    rnew[cCnt - 1] = DateTime.FromOADate((range.Cells[rCnt, cCnt] as Excel.Range).Value2);
+                                }
+                                catch 
+                                {
+                                    //blinha = false;
+                                    //sfalha = ex1.Message.ToString();
+                                }
+                            }
+                        }
+
+
+                        if (rnew.ItemArray[0].ToString() != "")
+                        {
+                            dt.Rows.Add(rnew);
+                        }
+
+                        //if (blinha == false)
+                        //{
+                        //    DataRow rnova = dtErro.NewRow();
+                        //    for (ccol = 0; ccol < rnew.ItemArray.Count(); ccol++)
+                        //    {
+                        //        rnova[ccol] = rnew[ccol];
+                        //    }
+                        //    rnova["Erro"] = sfalha.ToString();
+                        //    dtErro.Rows.Add(rnova);
+                        //}
+                    }
+                    //ds.Tables.Add(dt);
+
+                    //DataTable dt1;
+                    //dt1 = dt.Clone();
+                    //dt1 = dt.Copy();
+
+                    //dtSemDup = RemoveDuplicateRows(dt, 1);
+                    //dtDuplic = RemoveRows(dt1, 1);
+
+                    //CriarExcel(nomesemextensao + "_resultado" + ".xls", dtSemDup);
+                    //CriarExcel(nomesemextensao + "_duplicado" + ".xls", dtDuplic);
+                    //CriarExcel(nomesemextensao + "_falha" + ".xls", dtErro);
+                    break;
+                }
+
+                xlWorkBook.Close(true, null, null);
+                xlApp.Quit();
+
+                releaseObject(xlWorkSheet);
+                releaseObject(xlWorkBook);
+                releaseObject(xlApp);
+                //return dt;
+            }
+            catch
+            {
+            }
+            return dt;
+        }
+
     }
+
+
+
+    //private void button1_Click(object sender, EventArgs e)
+    //{
+
+
+    //    Stream myStream = null;
+    //    string leitura = "Falha na leitura";
+
+    //    OpenFileDialog openFileDialog1 = new OpenFileDialog();
+
+    //    openFileDialog1.InitialDirectory = "c:\\";
+    //    openFileDialog1.Filter = "xls files (*.xls)|*.xls|All files (*.*)|*.*";
+    //    openFileDialog1.FilterIndex = 2;
+    //    openFileDialog1.RestoreDirectory = true;
+
+
+    //    if (openFileDialog1.ShowDialog() == DialogResult.OK)
+    //    {
+    //        try
+    //        {
+    //            if ((myStream = openFileDialog1.OpenFile()) != null)
+    //            {
+    //                leitura = LerExcel(openFileDialog1.FileName, Path.GetExtension(openFileDialog1.FileName), 
+    //                    openFileDialog1.FileName.Replace(Path.GetExtension(openFileDialog1.FileName),""));
+
+    //                if (leitura != "")
+    //                {
+    //                    MessageBox.Show(leitura);
+    //                }
+    //            }
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            MessageBox.Show("Error: Could not read file from disk. Original error: " + ex.Message);
+    //        }
+    //    }
+    //    if (leitura == "")
+    //    {
+    //        MessageBox.Show("Leitura concluída com sucesso");
+    //    }
+    //}
+
+    //public string LerExcel(string NomeArquivo, string extensao, string nomesemextensao)
+    //{
+    //    try 
+    //    {
+    //        Excel.Application xlApp;
+    //        Excel.Workbook xlWorkBook;
+    //        Excel.Worksheet xlWorkSheet;
+    //        Excel.Range range;
+
+    //        DataTable dtSemDup;
+    //        DataTable dtDuplic;
+    //        string sfalha = "";
+
+    //        int rCnt = 0;
+    //        int cCnt = 0;
+    //        int ccol = 0;
+
+    //        xlApp = new Excel.Application();
+    //        xlWorkBook = xlApp.Workbooks.Open(NomeArquivo, 0, true, 5, "", "", true, Microsoft.Office.Interop.Excel.XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
+    //        xlWorkSheet = (Excel.Worksheet)xlWorkBook.Worksheets.get_Item(1);
+
+    //        range = xlWorkSheet.UsedRange;
+
+    //        DataSet ds = new DataSet();
+    //        foreach (Excel.Worksheet sheet in xlWorkBook.Sheets)
+    //        {
+    //            DataTable dt = new DataTable(sheet.Name);
+    //            DataTable dtErro = new DataTable(sheet.Name);
+
+    //            for (rCnt = 1; rCnt <= range.Rows.Count; rCnt++)
+    //            {
+    //                for (cCnt = 1; cCnt <= range.Columns.Count; cCnt++)
+    //                {
+    //                    DataColumn myDataColumn;
+
+    //                    myDataColumn = new DataColumn();
+    //                    try
+    //                    {
+    //                        Type typex = xlWorkSheet.Cells[2, cCnt].Value.GetType();
+    //                        myDataColumn.ColumnName = (string)(range.Cells[rCnt, cCnt] as Excel.Range).Value2;
+    //                        myDataColumn.DataType = Type.GetType(typex.ToString());
+    //                    }
+    //                    catch
+    //                    {
+    //                        myDataColumn.ColumnName = (string)(range.Cells[rCnt, cCnt] as Excel.Range).Value2;
+    //                        myDataColumn.DataType = Type.GetType("System.String");
+    //                    }
+
+    //                    dt.Columns.Add(myDataColumn);
+    //                }
+    //                break;
+    //            }
+
+    //            dtErro = dt.Clone();
+
+    //            DataColumn dc;
+    //            dc = new DataColumn();
+    //            dc.ColumnName = "Erro";
+    //            dc.DataType = Type.GetType("System.String");
+    //            dtErro.Columns.Add(dc);
+
+    //            Boolean blinha;
+    //            sfalha = "";
+
+    //            blinha = true;
+
+    //            for (rCnt = 2; rCnt <= range.Rows.Count; rCnt++)
+    //            {
+    //                DataRow rnew = dt.NewRow();
+    //                for (cCnt = 1; cCnt <= range.Columns.Count; cCnt++)
+    //                {
+
+    //                    Type typex = null;
+    //                    try
+    //                    {
+    //                        typex = xlWorkSheet.Cells[rCnt, cCnt].Value.GetType();
+    //                    }
+    //                    catch
+    //                    {
+    //                        typex = Type.GetType("System.String");
+    //                    }
+
+
+    //                    if (typex.FullName.ToString() == "System.String")
+    //                    {
+    //                        try
+    //                        {
+    //                            rnew[cCnt - 1] = (string)(range.Cells[rCnt, cCnt] as Excel.Range).Value2;
+    //                        }
+    //                        catch (Exception ex1)
+    //                        {
+    //                            blinha = false;
+    //                            sfalha = ex1.Message.ToString();
+    //                        }
+    //                    }
+
+    //                    if (typex.FullName.ToString() == "System.Double")
+    //                    {
+    //                        try
+    //                        {
+    //                            rnew[cCnt - 1] = (double)(range.Cells[rCnt, cCnt] as Excel.Range).Value2;
+    //                        }
+    //                        catch (Exception ex1)
+    //                        {
+    //                            blinha = false;
+    //                            sfalha = ex1.Message.ToString();
+    //                        }
+    //                    }
+
+    //                    if (typex.FullName.ToString() == "System.DateTime")
+    //                    {
+    //                        try
+    //                        {
+    //                            rnew[cCnt - 1] = DateTime.FromOADate((range.Cells[rCnt, cCnt] as Excel.Range).Value2);
+    //                        }
+    //                        catch (Exception ex1)
+    //                        {
+    //                            blinha = false;
+    //                            sfalha = ex1.Message.ToString();
+    //                        }
+    //                    }
+    //                }
+    //                dt.Rows.Add(rnew);
+
+    //                if (blinha == false)
+    //                {
+    //                    DataRow rnova = dtErro.NewRow();
+    //                    for (ccol = 0; ccol < rnew.ItemArray.Count(); ccol++)
+    //                    {
+    //                        rnova[ccol] = rnew[ccol];
+    //                    }
+    //                    rnova["Erro"] = sfalha.ToString();
+    //                    dtErro.Rows.Add(rnova);
+    //                }
+    //            }
+    //            ds.Tables.Add(dt);
+
+    //            DataTable dt1;
+    //            dt1 = dt.Clone();
+    //            dt1 = dt.Copy();
+
+    //            dtSemDup = RemoveDuplicateRows(dt, 1);
+    //            dtDuplic = RemoveRows(dt1, 1);
+
+    //            CriarExcel(nomesemextensao+ "_resultado"+".xls", dtSemDup);
+    //            CriarExcel(nomesemextensao + "_duplicado" + ".xls", dtDuplic);
+    //            CriarExcel(nomesemextensao + "_falha" + ".xls", dtErro);
+    //            break;
+    //        }
+
+    //        xlWorkBook.Close(true, null, null);
+    //        xlApp.Quit();
+
+    //        releaseObject(xlWorkSheet);
+    //        releaseObject(xlWorkBook);
+    //        releaseObject(xlApp);
+    //        return "";
+    //    }
+    //    catch
+    //    {
+    //        return "houve uma falha";
+    //    }
+    //}
+
+    // public string CriarExcel(string NomeArquivo, DataTable DtConteudo)
+    //{
+    //    string retorno = "";
+    //    Excel.Application XlObj = new Excel.Application();
+    //    XlObj.Visible = false;
+    //    Excel._Workbook WbObj = (Excel.Workbook)(XlObj.Workbooks.Add(""));
+    //    Excel._Worksheet WsObj = (Excel.Worksheet)WbObj.ActiveSheet;
+
+    //    try
+    //    {
+    //        int row = 1; int col = 1;
+    //        foreach (DataColumn column in DtConteudo.Columns)
+    //        {
+    //            WsObj.Cells[row, col] = column.ColumnName;
+    //            col++;
+    //        }
+    //        col = 1;
+    //        row++;
+    //        for (int i = 0; i < DtConteudo.Rows.Count; i++)
+    //        {
+    //            foreach (var cell in DtConteudo.Rows[i].ItemArray)
+    //            {
+    //                WsObj.Cells[row, col] = cell;
+    //                col++;
+    //            }
+    //            col = 1;
+    //            row++;
+    //        }
+    //        WbObj.SaveAs(NomeArquivo);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        retorno = "Houve um erro na criação do arquivo. Consulte o administrador do sistema. n" + ex.Message;
+    //    }
+    //    finally
+    //    {
+    //        WbObj.Close();
+    //    }
+
+    //    return retorno; 
+    //}
+
+    //public DataTable RemoveDuplicateRows(DataTable dTable, int indice)
+    //{
+    //    Hashtable hTable = new Hashtable();
+    //    ArrayList duplicateList = new ArrayList();
+
+    //    foreach (DataRow drow in dTable.Rows)
+    //    {
+    //        if (hTable.Contains(drow[indice]))
+    //        {
+    //            duplicateList.Add(drow);
+    //        }
+    //        else
+    //            hTable.Add(drow[indice], string.Empty);
+    //    }
+
+    //    foreach (DataRow dRow in duplicateList)
+    //    {
+    //        dTable.Rows.Remove(dRow);
+    //    }
+    //    return dTable;
+    //}
+
+    //public DataTable RemoveRows(DataTable dTable, int indice)
+    //{
+    //    Hashtable hTable = new Hashtable();
+    //    ArrayList duplicateList = new ArrayList();
+
+    //    foreach (DataRow drow in dTable.Rows)
+    //    {
+    //        if (hTable.Contains(drow[indice]))
+    //        {
+    //            duplicateList.Add(drow);
+    //        }
+    //        else
+    //            hTable.Add(drow[indice], string.Empty);
+    //    }
+
+    //    DataTable dtAux;
+    //    dtAux = dTable.Clone();
+
+
+    //    foreach (DataRow dRow in duplicateList)
+    //    {
+    //        dtAux.Rows.Add(dRow.ItemArray);
+    //    }
+    //    return dtAux;
+    //}
 }
