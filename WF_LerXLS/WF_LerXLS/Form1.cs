@@ -22,14 +22,15 @@ namespace WF_LerXLS
         {
             InitializeComponent();
         }
-
-
+        
         private void btn_Arquivo_Original_Click(object sender, EventArgs e)
         {
             Stream myStream = null;
             string leitura = "Falha na leitura";
 
             lstbox_campos.Items.Clear();
+            dtgv1.DataSource = null;
+
 
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
 
@@ -164,6 +165,13 @@ namespace WF_LerXLS
                 int clin = 0;
                 int ccol = 0;
 
+                int icolunao = 0;
+                int icolunac = 0;
+
+                int caux = 0;
+
+                DateTime datavalue;
+
                 try
                 {
                     iItemchave = lstbox_campos.SelectedIndex;
@@ -206,12 +214,45 @@ namespace WF_LerXLS
                                 if(cDuplic > 1)
                                 {
                                     DataRow rnova = dtResultado.NewRow();
-                                    for (ccol = 0; ccol < dtOrigem.Rows[clin].ItemArray.Count(); ccol++)
+                                    for (caux = 0; caux < dtOrigem.Rows[clin].ItemArray.Count(); caux++)
                                     {
-                                        rnova[ccol] = dtOrigem.Rows[clin].ItemArray[ccol];
+                                        rnova[caux] = dtOrigem.Rows[clin].ItemArray[caux];
                                     }
                                     rnova["Erro"] = "Duplicidade";
                                     dtResultado.Rows.Add(rnova);
+                                }
+                            }
+                        }
+
+                        if (dtOrigem.Rows[clin].ItemArray[0].ToString() == dtComparativo.Rows[ccol].ItemArray[0].ToString())
+                        {
+                            for (icolunao = 0; icolunao < dtOrigem.Rows[clin].ItemArray.Count(); icolunao++)
+                            {
+                                //valida se o valor da coluna relativa é diferente
+                                if (dtOrigem.Rows[clin].ItemArray[icolunao].ToString() != dtComparativo.Rows[ccol].ItemArray[icolunao].ToString())
+                                {
+                                    DataRow rnova = dtResultado.NewRow();
+                                    for (caux = 0; caux < dtOrigem.Rows[clin].ItemArray.Count(); caux++)
+                                    {
+                                        rnova[caux] = dtOrigem.Rows[clin].ItemArray[caux];
+                                    }
+                                    rnova["Erro"] = dtOrigem.Columns[icolunao].ColumnName.ToString() + " Diferente";
+                                    dtResultado.Rows.Add(rnova);
+                                }
+
+                                //valida o tipo da coluna
+                                if (dtOrigem.Columns[icolunao].DataType.ToString() == "System.DateTime")
+                                {
+                                    if (!DateTime.TryParse(dtComparativo.Rows[ccol].ItemArray[icolunao].ToString(), out datavalue)) 
+                                    {
+                                        DataRow rnova = dtResultado.NewRow();
+                                        for (caux = 0; caux < dtOrigem.Rows[clin].ItemArray.Count(); caux++)
+                                        {
+                                            rnova[caux] = dtOrigem.Rows[clin].ItemArray[caux];
+                                        }
+                                        rnova["Erro"] = dtOrigem.Columns[icolunao].ColumnName.ToString() + " Data Inválida";
+                                        dtResultado.Rows.Add(rnova);
+                                    }
                                 }
                             }
                         }
@@ -222,9 +263,9 @@ namespace WF_LerXLS
             }
             catch 
             {
-                progressBar1.Visible = false;
-                btn_comparar.Visible = true;
             }
+            progressBar1.Visible = false;
+            btn_comparar.Visible = true;
         }
 
         public DataTable LerExcel(string NomeArquivo)
@@ -254,7 +295,7 @@ namespace WF_LerXLS
                     DataTable dtErro = new DataTable(sheet.Name);
 
                     progressBar1.Maximum = range.Rows.Count;
-                    progressBar1.Step = 1;
+                    progressBar1.Step = (100 / range.Rows.Count);
                     progressBar1.Value = 0;
                     progressBar1.Visible = true;
                     btn_comparar.Visible = false;
@@ -286,18 +327,7 @@ namespace WF_LerXLS
                         break;
                     }
 
-                    //dtErro = dt.Clone();
-
-                    //DataColumn dc;
-                    //dc = new DataColumn();
-                    //dc.ColumnName = "Erro";
-                    //dc.DataType = Type.GetType("System.String");
-                    //dtErro.Columns.Add(dc);
-
-                    //Boolean blinha;
-                    //sfalha = "";
-
-                    //blinha = true;
+                  
 
                     for (rCnt = 2; rCnt <= range.Rows.Count; rCnt++)
                     {

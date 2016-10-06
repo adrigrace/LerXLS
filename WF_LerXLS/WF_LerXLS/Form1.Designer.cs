@@ -37,6 +37,7 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.lstbox_campos = new System.Windows.Forms.ListBox();
             this.dtgv1 = new System.Windows.Forms.DataGridView();
+            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dtgv1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -108,17 +109,32 @@
             // 
             // dtgv1
             // 
+            this.dtgv1.AllowUserToAddRows = false;
+            this.dtgv1.AllowUserToDeleteRows = false;
+            this.dtgv1.AllowUserToResizeRows = false;
+            this.dtgv1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.ColumnHeader;
+            this.dtgv1.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllHeaders;
             this.dtgv1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dtgv1.Location = new System.Drawing.Point(216, 192);
+            this.dtgv1.Location = new System.Drawing.Point(8, 168);
             this.dtgv1.Name = "dtgv1";
-            this.dtgv1.Size = new System.Drawing.Size(224, 150);
+            this.dtgv1.Size = new System.Drawing.Size(632, 150);
             this.dtgv1.TabIndex = 9;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(216, 320);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(224, 23);
+            this.button1.TabIndex = 10;
+            this.button1.Text = "Comparar";
+            this.button1.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(645, 391);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.dtgv1);
             this.Controls.Add(this.lstbox_campos);
             this.Controls.Add(this.progressBar1);
@@ -146,6 +162,7 @@
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.ListBox lstbox_campos;
         private System.Windows.Forms.DataGridView dtgv1;
+        private System.Windows.Forms.Button button1;
     }
 }
 
