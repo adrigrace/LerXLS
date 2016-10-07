@@ -58,7 +58,7 @@ namespace WF_LerXLS
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error: Could not read file from disk. Original error: " + ex.Message);
+                    MessageBox.Show("Houve um erro na leitura do arquivo. Consulte o administrador do sistema. n" + ex.Message);
                 }
             }
         }
@@ -157,7 +157,35 @@ namespace WF_LerXLS
 
         private void btn_comparar_Click(object sender, EventArgs e)
         {
-            Comparar();
+            int iItemchave = -1;
+
+            iItemchave = lstbox_campos.SelectedIndex;
+
+            if ((lblarquivo_origem.Text.Trim() == "") || (lblarquivo_comparativo.Text.Trim() == ""))
+            {
+                MessageBox.Show("Para efetuar a comparação é necessário que sejam selecionados os arquivos origem e destino !");
+            }
+            else {
+                if ((lblarquivo_origem.Text.Trim() != "") && (lblarquivo_comparativo.Text.Trim() != ""))
+                {
+                    if (iItemchave == -1)
+                    {
+                        DialogResult result = MessageBox.Show("Você realmente deseja fazer a comparação sem coluna de identificador único ?", "Questão", MessageBoxButtons.OKCancel);
+                        if (result == DialogResult.OK)
+                        {
+                            Comparar();
+                        }
+                        else
+                        {
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("A comparação irá começar e pode demorar alguns minutos, por favor aguarde.");
+                        Comparar();
+                    }
+                }
+            }
         }
 
         private DataTable Comparar()
@@ -202,16 +230,6 @@ namespace WF_LerXLS
                 dc.DataType = Type.GetType("System.String");
                 dtResultado.Columns.Add(dc);
 
-                dc = new DataColumn();
-                dc.ColumnName = "Linha";
-                dc.DataType = Type.GetType("System.Double");
-                dtResultado.Columns.Add(dc);
-
-                dc = new DataColumn();
-                dc.ColumnName = "Coluna";
-                dc.DataType = Type.GetType("System.Double");
-                dtResultado.Columns.Add(dc);
-
                 progressBar1.Visible = true;
                 btn_comparar.Visible = false;
 
@@ -238,8 +256,6 @@ namespace WF_LerXLS
                                     }
                                     sTemErro = "Duplicidade";
                                     rnova["Erro"] = sTemErro;
-                                    rnova["Linha"] = clin;
-                                    rnova["Coluna"] = caux;
                                     dtResultado.Rows.Add(rnova);
                                 }
                             }
@@ -259,8 +275,6 @@ namespace WF_LerXLS
                                     }
                                     sTemErro = dtOrigem.Columns[icolunao].ColumnName.ToString() + " Diferente";
                                     rnova["Erro"] = sTemErro;
-                                    rnova["Linha"] = clin;
-                                    rnova["Coluna"] = caux;
                                     dtResultado.Rows.Add(rnova);
                                 }
 
@@ -276,8 +290,6 @@ namespace WF_LerXLS
                                         }
                                         sTemErro = dtOrigem.Columns[icolunao].ColumnName.ToString() + " Data Inválida";
                                         rnova["Erro"] = sTemErro;
-                                        rnova["Linha"] = clin;
-                                        rnova["Coluna"] = caux;
                                         dtResultado.Rows.Add(rnova);
                                     }
                                 }
@@ -294,8 +306,6 @@ namespace WF_LerXLS
                                         }
                                         sTemErro = dtOrigem.Columns[icolunao].ColumnName.ToString() + " Valor Inválido";
                                         rnova["Erro"] = sTemErro;
-                                        rnova["Linha"] = clin;
-                                        rnova["Coluna"] = caux;
                                         dtResultado.Rows.Add(rnova);
                                     }
                                 }
@@ -352,6 +362,8 @@ namespace WF_LerXLS
         public DataTable LerExcel(string NomeArquivo)
         {
             DataTable dt = new DataTable();
+            Boolean bleitura = false;
+            string saux;
 
             try
             {
@@ -428,16 +440,27 @@ namespace WF_LerXLS
                                 typex = Type.GetType("System.String");
                             }
 
-
                             if (typex.FullName.ToString() == "System.String")
                             {
                                 try
                                 {
-                                    rnew[cCnt - 1] = (string)(range.Cells[rCnt, cCnt] as Excel.Range).Value2;
+                                    saux = (string)(range.Cells[rCnt, cCnt] as Excel.Range).Value2;
+                                    rnew[cCnt - 1] = saux;
+
+                                    if (cCnt == 1)
+                                    {
+                                        if (saux.Trim().Length < 4)
+                                        {
+                                            bleitura = true;
+                                        }
+                                    }
                                 }
                                 catch 
                                 {
-                                   
+                                    if (cCnt == 1)
+                                    {
+                                        bleitura = true;
+                                    }
                                 }
                             }
 
@@ -447,10 +470,7 @@ namespace WF_LerXLS
                                 {
                                     rnew[cCnt - 1] = (double)(range.Cells[rCnt, cCnt] as Excel.Range).Value2;
                                 }
-                                catch 
-                                {
-                                
-                                }
+                                catch { }
                             }
 
                             if (typex.FullName.ToString() == "System.DateTime")
@@ -459,13 +479,19 @@ namespace WF_LerXLS
                                 {
                                     rnew[cCnt - 1] = DateTime.FromOADate((range.Cells[rCnt, cCnt] as Excel.Range).Value2);
                                 }
-                                catch 
-                                {
-                                  
-                                }
+                                catch { }
+                            }
+
+                            if (bleitura == true)
+                            {
+                                break;
                             }
                         }
 
+                        if (bleitura == true)
+                        {
+                            break;
+                        }
 
                         if (rnew.ItemArray[0].ToString() != "")
                         {
@@ -499,13 +525,13 @@ namespace WF_LerXLS
 
         public void CriarExcel(string NomeArquivo, DataTable DtConteudo, DataTable dtResultado)
         {
-            string retorno = "";
             Excel.Application XlObj = new Excel.Application();
             XlObj.Visible = false;
             Excel._Workbook WbObj = (Excel.Workbook)(XlObj.Workbooks.Add(""));
             Excel._Worksheet WsObj = (Excel.Worksheet)WbObj.ActiveSheet;
 
             Excel.Range celulas;
+            string serro;
 
             try
             {
@@ -522,30 +548,86 @@ namespace WF_LerXLS
                 {
                     foreach (var cell in DtConteudo.Rows[i].ItemArray)
                     {
-                        foreach(DataRow dr in dtResultado.Rows)
-                        {
-                            if (Convert.ToInt32(dr["Linha"].ToString()) == row)
-                            {
-                                if (Convert.ToInt32(dr["Coluna"].ToString()) == col)
-                                {
-                                    celulas = (Excel.Range)WsObj.Cells[row, col];
-                                    celulas.Interior.Color = ColorTranslator.ToWin32(Color.Red);
-                                }
-                            }
-                        }
-
-
                         WsObj.Cells[row, col] = cell;
                         col++;
                     }
                     col = 1;
                     row++;
                 }
+
+                row = 0;
+                col = 0;
+
+                for (int i = 0; i < DtConteudo.Rows.Count; i++)
+                {
+                    for (int h = 0; h < DtConteudo.Rows[i].ItemArray.Count(); h++)
+                    {
+                        for (int j = 0; j < dtResultado.Rows.Count; j++)
+                        {
+                            for (int k = 0; k < dtResultado.Rows[j].ItemArray.Count(); k++)
+                            {
+                                if (DtConteudo.Rows[i].ItemArray[0].ToString() == dtResultado.Rows[j].ItemArray[0].ToString())
+                                {
+                                    serro = dtResultado.Rows[j]["Erro"].ToString();
+                                    if (serro.Replace(" Valor Inválido", "").Replace(" Diferente", "").Replace(" Data Inválida", "") == dtResultado.Columns[k].ColumnName.ToString())
+                                    {
+                                        celulas = (Excel.Range)WsObj.Cells[row, k];
+                                        celulas.Interior.Color = ColorTranslator.ToWin32(Color.Green);
+                                    }
+                                    if (serro == "Duplicidade")
+                                    {
+                                        celulas = (Excel.Range)WsObj.Cells[row, col];
+                                        celulas.Interior.Color = ColorTranslator.ToWin32(Color.Green);
+                                    }
+                                }
+                            }
+                        }
+                        col++;
+                    }
+                    col = 1;
+                    row++;
+                }
+
+
+                Excel._Worksheet WsObj1 = (Excel.Worksheet)XlObj.Worksheets.Add();
+                WsObj1 = (Excel.Worksheet)WbObj.ActiveSheet;
+
+                row = 1;
+                col = 1;
+
+                try
+                {
+                    foreach (DataColumn column in dtResultado.Columns)
+                    {
+                        WsObj1.Cells[row, col] = column.ColumnName;
+                        col++;
+                    }
+                    col = 1;
+                    row++;
+
+                    for (int i = 0; i < dtResultado.Rows.Count; i++)
+                    {
+                        foreach (var cell in dtResultado.Rows[i].ItemArray)
+                        {
+                            WsObj1.Cells[row, col] = cell;
+                            col++;
+                        }
+                        col = 1;
+                        row++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Houve um erro na criação do arquivo. Consulte o administrador do sistema. n" + ex.Message);
+                }
+                //Excel._Workbook WbObj = (Excel.Workbook)(XlObj.Workbooks.Add(""));
+                //Excel._Worksheet WsObj = (Excel.Worksheet)WbObj.ActiveSheet;
+
                 WbObj.SaveAs(NomeArquivo);
             }
             catch (Exception ex)
             {
-                retorno = "Houve um erro na criação do arquivo. Consulte o administrador do sistema. n" + ex.Message;
+                MessageBox.Show("Houve um erro na criação do arquivo. Consulte o administrador do sistema. n" + ex.Message);
             }
             finally
             {

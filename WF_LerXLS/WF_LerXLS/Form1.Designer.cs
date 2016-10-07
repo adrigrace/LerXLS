@@ -41,6 +41,7 @@
             this.dtgv2 = new System.Windows.Forms.DataGridView();
             this.lblerros = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dtgv1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dtgv2)).BeginInit();
             this.SuspendLayout();
@@ -117,9 +118,8 @@
             // 
             this.dtgv1.AllowUserToAddRows = false;
             this.dtgv1.AllowUserToDeleteRows = false;
-            this.dtgv1.AllowUserToResizeRows = false;
-            this.dtgv1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.ColumnHeader;
-            this.dtgv1.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllHeaders;
+            this.dtgv1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dtgv1.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             this.dtgv1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dtgv1.Location = new System.Drawing.Point(8, 160);
             this.dtgv1.Name = "dtgv1";
@@ -168,11 +168,21 @@
             this.label1.TabIndex = 13;
             this.label1.Text = "Subtotal de Erros";
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(272, 8);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(144, 13);
+            this.label2.TabIndex = 14;
+            this.label2.Text = "Coluna de identificador único";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 561);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.lblerros);
             this.Controls.Add(this.dtgv2);
@@ -209,6 +219,7 @@
         private System.Windows.Forms.DataGridView dtgv2;
         private System.Windows.Forms.Label lblerros;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
     }
 }
 
