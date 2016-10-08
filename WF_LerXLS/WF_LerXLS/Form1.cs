@@ -26,7 +26,7 @@ namespace WF_LerXLS
         private void btn_Arquivo_Original_Click(object sender, EventArgs e)
         {
             Stream myStream = null;
-            string leitura = "Falha na leitura";
+            string leitura = "Houve um erro na leitura do arquivo. Consulte o administrador do sistema.";
 
             lstbox_campos.Items.Clear();
             dtgv1.DataSource = null;
@@ -265,6 +265,41 @@ namespace WF_LerXLS
                         {
                             for (icolunao = 0; icolunao < dtOrigem.Rows[clin].ItemArray.Count(); icolunao++)
                             {
+                                //valida se é um cpf ou cnpj e se for verifica se o valor é válido
+                                if (dtOrigem.Columns[icolunao].ColumnName.ToString() == "CPF")
+                                {
+                                    if ((dtComparativo.Rows[ccol].ItemArray[icolunao].ToString().Trim().Length < 11) ||
+                                        (dtComparativo.Rows[ccol].ItemArray[icolunao].ToString().Trim().Length > 11) || 
+                                        (IsCpf(dtComparativo.Rows[ccol].ItemArray[icolunao].ToString()) == false))
+                                    {
+                                        DataRow rnova = dtResultado.NewRow();
+                                        for (caux = 0; caux < dtOrigem.Rows[clin].ItemArray.Count(); caux++)
+                                        {
+                                            rnova[caux] = dtOrigem.Rows[clin].ItemArray[caux];
+                                        }
+                                        sTemErro = dtOrigem.Columns[icolunao].ColumnName.ToString() + " Valor Inválido";
+                                        rnova["Erro"] = sTemErro;
+                                        dtResultado.Rows.Add(rnova);
+                                    }
+                                }
+
+                                if (dtOrigem.Columns[icolunao].ColumnName.ToString() == "CNPJ")
+                                {
+                                    if ((dtComparativo.Rows[ccol].ItemArray[icolunao].ToString().Trim().Length < 14) ||
+                                        (dtComparativo.Rows[ccol].ItemArray[icolunao].ToString().Trim().Length > 14) ||
+                                        (IsCnpj(dtComparativo.Rows[ccol].ItemArray[icolunao].ToString()) == false))
+                                    {
+                                        DataRow rnova = dtResultado.NewRow();
+                                        for (caux = 0; caux < dtOrigem.Rows[clin].ItemArray.Count(); caux++)
+                                        {
+                                            rnova[caux] = dtOrigem.Rows[clin].ItemArray[caux];
+                                        }
+                                        sTemErro = dtOrigem.Columns[icolunao].ColumnName.ToString() + " Valor Inválido";
+                                        rnova["Erro"] = sTemErro;
+                                        dtResultado.Rows.Add(rnova);
+                                    }
+                                }
+
                                 //valida se o valor da coluna relativa é diferente
                                 if (dtOrigem.Rows[clin].ItemArray[icolunao].ToString() != dtComparativo.Rows[ccol].ItemArray[icolunao].ToString())
                                 {
@@ -346,6 +381,8 @@ namespace WF_LerXLS
                     drResumo[1] = cDuplic;
                     dtResumo.Rows.Add(drResumo);
                 }
+
+                dtResumo = RemoveDuplicateRows(dtResumo, 0);
                 dtgv2.DataSource = dtResumo;
 
                 dtsaida = dtResultado.Clone();
@@ -388,7 +425,7 @@ namespace WF_LerXLS
                     DataTable dtErro = new DataTable(sheet.Name);
 
                     progressBar1.Maximum = range.Rows.Count;
-                    progressBar1.Step = (100 / range.Rows.Count);
+                    progressBar1.Step = (1000 / range.Rows.Count);
                     progressBar1.Value = 0;
                     progressBar1.Visible = true;
                     btn_comparar.Visible = false;
@@ -407,7 +444,15 @@ namespace WF_LerXLS
                             {
                                 Type typex = xlWorkSheet.Cells[2, cCnt].Value.GetType();
                                 myDataColumn.ColumnName = (string)(range.Cells[rCnt, cCnt] as Excel.Range).Value2;
-                                myDataColumn.DataType = Type.GetType(typex.ToString());
+
+                                if (((string)(range.Cells[rCnt, cCnt] as Excel.Range).Value2 == "CPF") || ((string)(range.Cells[rCnt, cCnt] as Excel.Range).Value2 == "CNPJ"))
+                                {
+                                    myDataColumn.DataType = Type.GetType("System.String");
+                                }
+                                else
+                                {
+                                    myDataColumn.DataType = Type.GetType(typex.ToString());
+                                }
                             }
                             catch
                             {
@@ -431,9 +476,12 @@ namespace WF_LerXLS
                         {
 
                             Type typex = null;
+                            string sname = "";
+
                             try
                             {
                                 typex = xlWorkSheet.Cells[rCnt, cCnt].Value.GetType();
+                                sname = (string)(range.Cells[1, cCnt] as Excel.Range).Value2;
                             }
                             catch
                             {
@@ -451,6 +499,7 @@ namespace WF_LerXLS
                                     {
                                         if (saux.Trim().Length < 4)
                                         {
+                                            //a linha não será lida pois não contém o mínimo de 3 caracteres na primeira coluna
                                             bleitura = true;
                                         }
                                     }
@@ -514,6 +563,120 @@ namespace WF_LerXLS
             return dt;
         }
 
+        public static bool IsCnpj(string cnpj)
+        {
+            string CNPJ = cnpj.Replace(".", "");
+            CNPJ = CNPJ.Replace("/", "");
+            CNPJ = CNPJ.Replace("-", "");
+
+            int[] digitos, soma, resultado;
+            int nrDig;
+            string ftmt;
+            bool[] CNPJOk;
+
+            ftmt = "6543298765432";
+            digitos = new int[14];
+            soma = new int[2];
+            soma[0] = 0;
+            soma[1] = 0;
+            resultado = new int[2];
+            resultado[0] = 0;
+            resultado[1] = 0;
+            CNPJOk = new bool[2];
+            CNPJOk[0] = false;
+            CNPJOk[1] = false;
+
+            try
+            {
+                for (nrDig = 0; nrDig < 14; nrDig++)
+                {
+                    digitos[nrDig] = int.Parse(
+                     CNPJ.Substring(nrDig, 1));
+                    if (nrDig <= 11)
+                        soma[0] += (digitos[nrDig] *
+                        int.Parse(ftmt.Substring(
+                          nrDig + 1, 1)));
+                    if (nrDig <= 12)
+                        soma[1] += (digitos[nrDig] *
+                        int.Parse(ftmt.Substring(
+                          nrDig, 1)));
+                }
+
+                for (nrDig = 0; nrDig < 2; nrDig++)
+                {
+                    resultado[nrDig] = (soma[nrDig] % 11);
+                    if ((resultado[nrDig] == 0) || (resultado[nrDig] == 1))
+                        CNPJOk[nrDig] = (
+                        digitos[12 + nrDig] == 0);
+
+                    else
+                        CNPJOk[nrDig] = (
+                        digitos[12 + nrDig] == (
+                        11 - resultado[nrDig]));
+
+                }
+
+                return (CNPJOk[0] && CNPJOk[1]);
+
+            }
+            catch
+            {
+                return false;
+            }
+         }
+
+        public static bool IsCpf(string cpf)
+        {
+            string valor = cpf.Replace(".", "");
+            valor = valor.Replace("-", "");
+
+            if (valor.Length != 11)
+                return false;
+
+            bool igual = true;
+            for (int i = 1; i < 11 && igual; i++)
+                if (valor[i] != valor[0])
+                    igual = false;
+
+            if (igual || valor == "12345678909")
+                return false;
+
+            int[] numeros = new int[11];
+            for (int i = 0; i < 11; i++)
+                numeros[i] = int.Parse(
+                valor[i].ToString());
+
+            int soma = 0;
+            for (int i = 0; i < 9; i++)
+                soma += (10 - i) * numeros[i];
+
+            int resultado = soma % 11;
+            if (resultado == 1 || resultado == 0)
+            {
+                if (numeros[9] != 0)
+                    return false;
+            }
+            else if (numeros[9] != 11 - resultado)
+                return false;
+
+            soma = 0;
+            for (int i = 0; i < 10; i++)
+                soma += (11 - i) * numeros[i];
+
+            resultado = soma % 11;
+
+            if (resultado == 1 || resultado == 0)
+            {
+                if (numeros[10] != 0)
+                    return false;
+
+            }
+            else
+                if (numeros[10] != 11 - resultado)
+                    return false;
+            return true;
+        }
+
         private void btn_Exporta_Excel_Click(object sender, EventArgs e)
         {
             DataTable dtOrigem = LerExcel(lblarquivo_comparativo.Text);
@@ -538,6 +701,11 @@ namespace WF_LerXLS
                 int row = 1; int col = 1;
                 foreach (DataColumn column in DtConteudo.Columns)
                 {
+                    if (col == 1)
+                    {
+                        WsObj.Cells[row, col] = "NP";
+                        col++;
+                    }
                     WsObj.Cells[row, col] = column.ColumnName;
                     col++;
                 }
@@ -548,7 +716,11 @@ namespace WF_LerXLS
                 {
                     foreach (var cell in DtConteudo.Rows[i].ItemArray)
                     {
-                        WsObj.Cells[row, col] = cell;
+                        if (col==1)
+                        {
+                            WsObj.Cells[row, col] = (row - 1);
+                        }
+                        WsObj.Cells[row, (col+1)] = cell;
                         col++;
                     }
                     col = 1;
@@ -571,13 +743,16 @@ namespace WF_LerXLS
                                     serro = dtResultado.Rows[j]["Erro"].ToString();
                                     if (serro.Replace(" Valor Inválido", "").Replace(" Diferente", "").Replace(" Data Inválida", "") == dtResultado.Columns[k].ColumnName.ToString())
                                     {
-                                        celulas = (Excel.Range)WsObj.Cells[row, k];
-                                        celulas.Interior.Color = ColorTranslator.ToWin32(Color.Green);
+                                        celulas = (Excel.Range)WsObj.Cells[(i + 2), (k + 2)];
+                                        celulas.Interior.Color = ColorTranslator.ToWin32(Color.Red);
                                     }
                                     if (serro == "Duplicidade")
                                     {
-                                        celulas = (Excel.Range)WsObj.Cells[row, col];
-                                        celulas.Interior.Color = ColorTranslator.ToWin32(Color.Green);
+                                        if (k == 0)
+                                        {
+                                            celulas = (Excel.Range)WsObj.Cells[(i + 2), (k + 2)];
+                                            celulas.Interior.Color = ColorTranslator.ToWin32(Color.Red);
+                                        }
                                     }
                                 }
                             }
@@ -620,8 +795,6 @@ namespace WF_LerXLS
                 {
                     MessageBox.Show("Houve um erro na criação do arquivo. Consulte o administrador do sistema. n" + ex.Message);
                 }
-                //Excel._Workbook WbObj = (Excel.Workbook)(XlObj.Workbooks.Add(""));
-                //Excel._Worksheet WsObj = (Excel.Worksheet)WbObj.ActiveSheet;
 
                 WbObj.SaveAs(NomeArquivo);
             }
@@ -632,8 +805,30 @@ namespace WF_LerXLS
             finally
             {
                 WbObj.Close();
+                releaseObject(WbObj);
             }
         }
 
+        public DataTable RemoveDuplicateRows(DataTable dTable, int indice)
+        {
+            Hashtable hTable = new Hashtable();
+            ArrayList duplicateList = new ArrayList();
+
+            foreach (DataRow drow in dTable.Rows)
+            {
+                if (hTable.Contains(drow[indice]))
+                {
+                    duplicateList.Add(drow);
+                }
+                else
+                    hTable.Add(drow[indice], string.Empty);
+            }
+
+            foreach (DataRow dRow in duplicateList)
+            {
+                dTable.Rows.Remove(dRow);
+            }
+            return dTable;
+        }
     }
 }
