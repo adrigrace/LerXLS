@@ -797,6 +797,8 @@ namespace WF_LerXLS
                 }
 
                 WbObj.SaveAs(NomeArquivo);
+
+                MessageBox.Show("O arquivo foi salvo em :" + NomeArquivo);
             }
             catch (Exception ex)
             {
