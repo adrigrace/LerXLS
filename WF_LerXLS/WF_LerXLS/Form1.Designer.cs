@@ -42,6 +42,7 @@
             this.lblerros = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.btn_Nova_leitura = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dtgv1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dtgv2)).BeginInit();
             this.SuspendLayout();
@@ -52,9 +53,9 @@
             // 
             // btn_Arquivo_Original
             // 
-            this.btn_Arquivo_Original.Location = new System.Drawing.Point(80, 24);
+            this.btn_Arquivo_Original.Location = new System.Drawing.Point(8, 24);
             this.btn_Arquivo_Original.Name = "btn_Arquivo_Original";
-            this.btn_Arquivo_Original.Size = new System.Drawing.Size(192, 23);
+            this.btn_Arquivo_Original.Size = new System.Drawing.Size(224, 23);
             this.btn_Arquivo_Original.TabIndex = 1;
             this.btn_Arquivo_Original.Text = "Selecione o Arquivo Original";
             this.btn_Arquivo_Original.UseVisualStyleBackColor = true;
@@ -72,7 +73,7 @@
             // lblarquivo_comparativo
             // 
             this.lblarquivo_comparativo.AutoSize = true;
-            this.lblarquivo_comparativo.Location = new System.Drawing.Point(504, 56);
+            this.lblarquivo_comparativo.Location = new System.Drawing.Point(560, 56);
             this.lblarquivo_comparativo.MaximumSize = new System.Drawing.Size(250, 20);
             this.lblarquivo_comparativo.Name = "lblarquivo_comparativo";
             this.lblarquivo_comparativo.Size = new System.Drawing.Size(0, 13);
@@ -80,9 +81,9 @@
             // 
             // btn_Arquivo_Comparativo
             // 
-            this.btn_Arquivo_Comparativo.Location = new System.Drawing.Point(496, 24);
+            this.btn_Arquivo_Comparativo.Location = new System.Drawing.Point(552, 24);
             this.btn_Arquivo_Comparativo.Name = "btn_Arquivo_Comparativo";
-            this.btn_Arquivo_Comparativo.Size = new System.Drawing.Size(192, 23);
+            this.btn_Arquivo_Comparativo.Size = new System.Drawing.Size(224, 23);
             this.btn_Arquivo_Comparativo.TabIndex = 4;
             this.btn_Arquivo_Comparativo.Text = "Selecione o Arquivo de Verificação";
             this.btn_Arquivo_Comparativo.UseVisualStyleBackColor = true;
@@ -90,9 +91,9 @@
             // 
             // btn_comparar
             // 
-            this.btn_comparar.Location = new System.Drawing.Point(272, 128);
+            this.btn_comparar.Location = new System.Drawing.Point(232, 120);
             this.btn_comparar.Name = "btn_comparar";
-            this.btn_comparar.Size = new System.Drawing.Size(224, 23);
+            this.btn_comparar.Size = new System.Drawing.Size(320, 23);
             this.btn_comparar.TabIndex = 6;
             this.btn_comparar.Text = "Comparar";
             this.btn_comparar.UseVisualStyleBackColor = true;
@@ -100,18 +101,18 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(272, 128);
+            this.progressBar1.Location = new System.Drawing.Point(232, 120);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(224, 23);
+            this.progressBar1.Size = new System.Drawing.Size(320, 23);
             this.progressBar1.TabIndex = 7;
             this.progressBar1.Visible = false;
             // 
             // lstbox_campos
             // 
             this.lstbox_campos.FormattingEnabled = true;
-            this.lstbox_campos.Location = new System.Drawing.Point(272, 24);
+            this.lstbox_campos.Location = new System.Drawing.Point(232, 24);
             this.lstbox_campos.Name = "lstbox_campos";
-            this.lstbox_campos.Size = new System.Drawing.Size(224, 95);
+            this.lstbox_campos.Size = new System.Drawing.Size(320, 95);
             this.lstbox_campos.TabIndex = 8;
             // 
             // dtgv1
@@ -171,17 +172,28 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(272, 8);
+            this.label2.Location = new System.Drawing.Point(232, 8);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(144, 13);
             this.label2.TabIndex = 14;
             this.label2.Text = "Coluna de identificador único";
+            // 
+            // btn_Nova_leitura
+            // 
+            this.btn_Nova_leitura.Location = new System.Drawing.Point(552, 336);
+            this.btn_Nova_leitura.Name = "btn_Nova_leitura";
+            this.btn_Nova_leitura.Size = new System.Drawing.Size(224, 23);
+            this.btn_Nova_leitura.TabIndex = 15;
+            this.btn_Nova_leitura.Text = "Nova Leitura";
+            this.btn_Nova_leitura.UseVisualStyleBackColor = true;
+            this.btn_Nova_leitura.Click += new System.EventHandler(this.btn_Nova_leitura_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 561);
+            this.Controls.Add(this.btn_Nova_leitura);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.lblerros);
@@ -220,6 +232,7 @@
         private System.Windows.Forms.Label lblerros;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button btn_Nova_leitura;
     }
 }
 

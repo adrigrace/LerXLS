@@ -696,6 +696,9 @@ namespace WF_LerXLS
             Excel.Range celulas;
             string serro;
 
+            List<string> list = new List<string>();
+            Boolean achou;
+
             try
             {
                 int row = 1; int col = 1;
@@ -744,14 +747,32 @@ namespace WF_LerXLS
                                     if (serro.Replace(" Valor Inválido", "").Replace(" Diferente", "").Replace(" Data Inválida", "") == dtResultado.Columns[k].ColumnName.ToString())
                                     {
                                         celulas = (Excel.Range)WsObj.Cells[(i + 2), (k + 2)];
-                                        celulas.Interior.Color = ColorTranslator.ToWin32(Color.Red);
+                                    celulas.Interior.Color = ColorTranslator.ToWin32(Color.Red);
                                     }
                                     if (serro == "Duplicidade")
                                     {
                                         if (k == 0)
                                         {
-                                            celulas = (Excel.Range)WsObj.Cells[(i + 2), (k + 2)];
-                                            celulas.Interior.Color = ColorTranslator.ToWin32(Color.Red);
+                                            if (k == h)
+                                            {
+                                                achou = false;
+                                                for (int c = 0; c < list.Count; c++)
+                                                {
+                                                    if (list[c].ToString() == dtResultado.Rows[j].ItemArray[0].ToString())
+                                                    {
+                                                        achou = true;
+                                                    }
+                                                }
+                                                if (achou == false)
+                                                {
+                                                    list.Add(dtResultado.Rows[j].ItemArray[0].ToString());
+                                                }
+                                                else
+                                                {
+                                                    celulas = (Excel.Range)WsObj.Cells[(i + 2), (k + 2)];
+                                                    celulas.Interior.Color = ColorTranslator.ToWin32(Color.Red);
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -831,6 +852,18 @@ namespace WF_LerXLS
                 dTable.Rows.Remove(dRow);
             }
             return dTable;
+        }
+
+        private void btn_Nova_leitura_Click(object sender, EventArgs e)
+        {
+            lblarquivo_comparativo.Text = "";
+            lblarquivo_origem.Text = "";
+            lstbox_campos.Items.Clear();
+            dtgv1.DataSource = null;
+            dtgv2.DataSource = null;
+            progressBar1.Visible = false;
+            progressBar1.Value = 0;
+            btn_comparar.Visible = true;
         }
     }
 }
