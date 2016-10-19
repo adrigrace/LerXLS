@@ -425,7 +425,16 @@ namespace WF_LerXLS
                     DataTable dtErro = new DataTable(sheet.Name);
 
                     progressBar1.Maximum = range.Rows.Count;
-                    progressBar1.Step = (1000 / range.Rows.Count);
+
+                    if (range.Rows.Count > 100)
+                    {
+                        progressBar1.Step = range.Rows.Count / 100;
+                    }
+                    else
+                    {
+                        progressBar1.Step = (100 / range.Rows.Count);
+                    }
+                
                     progressBar1.Value = 0;
                     progressBar1.Visible = true;
                     btn_comparar.Visible = false;
