@@ -434,6 +434,8 @@ namespace WF_LerXLS
                     {
                         progressBar1.Step = (100 / range.Rows.Count);
                     }
+
+                    progressBar1.Step = 1; 
                 
                     progressBar1.Value = 0;
                     progressBar1.Visible = true;
@@ -556,6 +558,8 @@ namespace WF_LerXLS
                             dt.Rows.Add(rnew);
                         }
                     }
+
+                    progressBar1.Value = range.Rows.Count;
                     break;
                 }
 
