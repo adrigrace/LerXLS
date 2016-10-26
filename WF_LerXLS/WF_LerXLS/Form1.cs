@@ -413,10 +413,23 @@ namespace WF_LerXLS
                 int cCnt = 0;
 
                 xlApp = new Excel.Application();
+
+                xlApp.Visible = false;
+                xlApp.ScreenUpdating = false;
+                xlApp.DisplayAlerts = false;
+
                 xlWorkBook = xlApp.Workbooks.Open(NomeArquivo, 0, true, 5, "", "", true, Microsoft.Office.Interop.Excel.XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
                 xlWorkSheet = (Excel.Worksheet)xlWorkBook.Worksheets.get_Item(1);
 
-                range = xlWorkSheet.UsedRange;
+                //range = xlWorkSheet.UsedRange;
+
+                range = xlWorkSheet.get_Range("A1", Missing.Value);
+                range = range.get_End(Excel.XlDirection.xlToRight);
+                range = range.get_End(Excel.XlDirection.xlDown);
+                string downAddress = range.get_Address(false, false,Excel.XlReferenceStyle.xlA1, Type.Missing, Type.Missing);
+
+                range = xlWorkSheet.get_Range("A1", downAddress);
+
 
                 DataSet ds = new DataSet();
                 foreach (Excel.Worksheet sheet in xlWorkBook.Sheets)
