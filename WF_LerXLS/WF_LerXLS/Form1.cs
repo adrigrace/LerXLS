@@ -388,7 +388,7 @@ namespace WF_LerXLS
                 dtsaida = dtResultado.Clone();
                 dtsaida = dtResultado.Copy();
             }
-            catch (Exception ex)
+            catch
             {
             }
             progressBar1.Visible = false;

@@ -339,7 +339,7 @@
 		<col def="S0">ISDotNetInstallerArgsCommit</col>
 		<col def="S0">ISDotNetInstallerArgsUninstall</col>
 		<col def="S0">ISDotNetInstallerArgsRollback</col>
-		<row><td>WF_LerXLS.exe</td><td>{A2FE326A-5E5D-4DD7-8765-C14AE269C4F4}</td><td>INSTALLDIR</td><td>2</td><td/><td>wf_lerxls.exe</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>WF_LerXLS.exe</td><td>{9DE38E98-E472-4D22-91C0-0AB33896EA00}</td><td>INSTALLDIR</td><td>2</td><td/><td>wf_lerxls.exe</td><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 	</table>
 
 	<table name="Condition">
@@ -2018,7 +2018,7 @@
 		<col def="S0">FTPLocation</col>
 		<col def="S0">HTTPLocation</col>
 		<col def="S0">Miscellaneous</col>
-		<row><td>WF_LerXLS.exe</td><td/><td/><td>_83BB01BF_B255_46FA_84B3_D3908B08D40C_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>WF_LerXLS.exe</td><td/><td/><td>_71E9D37F_DAC5_4731_BAB5_8A4586FE9E6E_FILTER</td><td/><td/><td/><td/></row>
 	</table>
 
 	<table name="ISCustomActionReference">
@@ -3959,7 +3959,7 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<row><td>ISTheme</td><td>InstallShield Blue.theme</td></row>
 		<row><td>ISUSLock</td><td>{7E198C99-26B5-4E23-9F68-DF9DD5EBAF38}</td></row>
 		<row><td>ISUSSignature</td><td>{9497017E-3270-405E-BF66-87DB7B857658}</td></row>
-		<row><td>ISVisitedViews</td><td>viewAssistant</td></row>
+		<row><td>ISVisitedViews</td><td>viewAssistant,viewAppFiles</td></row>
 		<row><td>Limited</td><td>1</td></row>
 		<row><td>LockPermissionMode</td><td>1</td></row>
 		<row><td>MsiExecCmdLineOptions</td><td/></row>
@@ -4408,9 +4408,6 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<col def="L255">FileName</col>
 		<col def="s72">DirProperty</col>
 		<col def="i2">InstallMode</col>
-		<row><td>FileKey1</td><td>WF_LerXLS.exe</td><td/><td>chipti_1_chiptiming</td><td>2</td></row>
-		<row><td>FileKey2</td><td>WF_LerXLS.exe</td><td/><td>valida_1_validacao_xls</td><td>2</td></row>
-		<row><td>WF_LerXLS.exe</td><td>WF_LerXLS.exe</td><td/><td>valida_1_validacao_xls</td><td>2</td></row>
 	</table>
 
 	<table name="RemoveIniFile">
@@ -4496,8 +4493,6 @@ UwBpAG4AZwBsAGUASQBtAGEAZwBlAAEARQB4AHAAcgBlAHMAcwA=
 		<col def="S255">ISComments</col>
 		<col def="S255">ISShortcutName</col>
 		<col def="I4">ISAttributes</col>
-		<row><td>WF_LerXLS.exe</td><td>valida_1_validacao_xls</td><td>##IDS_SHORTCUT_DISPLAY_NAME1##</td><td>WF_LerXLS.exe</td><td>AlwaysInstall</td><td/><td/><td/><td>WF_LerXLS.exe_7ABE232660FA4E6E9C1F21DF17B38CD8.exe</td><td>0</td><td>1</td><td>INSTALLDIR</td><td/><td/><td/><td/><td/><td/><td/></row>
-		<row><td>WF_LerXLS.exe1</td><td>DesktopFolder</td><td>##IDS_SHORTCUT_DISPLAY_NAME1##</td><td>WF_LerXLS.exe</td><td>AlwaysInstall</td><td/><td/><td/><td>WF_LerXLS.exe1_34160A824BC541F3A87A8905F6BB002E.exe</td><td>0</td><td>1</td><td>INSTALLDIR</td><td/><td/><td/><td/><td/><td/><td/></row>
 	</table>
 
 	<table name="Signature">
